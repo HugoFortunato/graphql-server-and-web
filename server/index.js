@@ -23,7 +23,7 @@ var mysql = require('mysql');
 app.use((req, res, next) => {
     req.mysqlDb = mysql.createConnection({
         host: 'localhost',
-        user: 'root',
+        user: 'hugo',
         password: 'Age14rjy',
         database: 'graphql'
     });

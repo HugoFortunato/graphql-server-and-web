@@ -1,54 +1,58 @@
 import { useMutation, useQuery } from "@apollo/client";
-import React, { useState } from 'react';
 import './App.css';
-import { GET_USERS, UPDATE_EMAIL } from './graphql/queries';
+import { GET_USERS, ADD_USER } from './graphql/queries';
+import { useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
 
 function App() {
-  const { loading, error, data } = useQuery(GET_USERS);
-  const [update] = useMutation(UPDATE_EMAIL);
-  const [editing, setEditing] = useState(0);
-  const [newEmail, setNewEmail] = useState("")
+  const { register, handleSubmit } = useForm();
+  const { data } = useQuery(GET_USERS)
+  const [addUser] = useMutation(ADD_USER)
+  const usersArr = data?.getUsers
+  const [users, setUsers] = useState(usersArr)
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error : {error.message}</p>;
+  const onSubmit = (item) => {
+    addUser({
+      variables: item
+    }) 
 
-  const updateEmail = (id) => {
-
-    update({ variables: { id: ~~id, email: newEmail } })
-
-    alert("E-mail atualizado");
-
-    const newData = data.getUsers.map(item => {
-      if (item.id === id) {
-        return {
-          ...item,
-          email: newEmail
-        }
-      }
-
-      return item;
-    })
-
-    console.log(newData)
-
-    setEditing(0);
+    setUsers([...users, item])
   }
 
-  return data.getUsers.map(({ id, name, email }) => (
-    <div key={id}>
-      <h3>{name}</h3>
-      <br />
-      <b>About this location:</b>
-      <p onClick={() => setEditing(id)}>{email}</p>
+  const removeItem = (index) => {
+    console.log(index)
+ 
+    setUsers((oldUser) => {
+      return oldUser.filter((_, i) => i !== index)
+    })
+  }
 
-      {editing === id && <div>
-        <input type="email" value={newEmail} onChange={e => setNewEmail(e.target.value)} />
+   useEffect(() => {
+	 	setUsers(usersArr)
+	 }, [usersArr])
 
-        <button onClick={() => updateEmail(id)}>Salvar</button>
-      </div>}
-      <br />
+  return (
+    <div>
+      <h1>Add users</h1>
+
+      <form onSubmit={handleSubmit(onSubmit)}>
+      <input  {...register("name")} />      
+      <input {...register("email")} />
+      <input {...register("jobtitle")} />
+      
+      <button type="submit">Add user</button>
+
+      <h1>Users</h1>
+
+     {users?.map(({id, name, email }, index) => ( 
+      <div key={id} onClick={() => removeItem(index)}>
+      <span > {name}</span>
+      <span> {email} </span>
+      </div>
+    ))}
+    </form>
     </div>
-  ));
+  )
 }
 
 export default App;
