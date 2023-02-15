@@ -20,3 +20,8 @@ export const ADD_USER = gql`
    createUser(name: $name, email: $email, job_title: $jobtitle)
   }
 `
+export const REMOVE_USER = gql`
+  mutation ($id: Int!) {
+    deleteUser(id: $id)
+  }
+`
